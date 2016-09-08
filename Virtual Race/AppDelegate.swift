@@ -12,9 +12,25 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    
+    let stack = CoreDataStack(modelName: "Model")
+    
+    func preloadData() {
+        
+        do{
+            try stack!.dropAllData()
+            print("data deleted")
+        }catch{
+            print("Error droping all objects in DB")
+        }
+    }
 
+    
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+        
+        preloadData()
+        
         // Override point for customization after application launch.
         return true
     }
@@ -39,6 +55,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    }
+
+    
+    
+    func application(app: UIApplication, openURL url: NSURL, options: [String : AnyObject]) -> Bool {
+        
+        let urlAuthorizationCode = String(url)
+        
+        let findStartingIndex = urlAuthorizationCode.rangeOfString("=")
+        let startingIndex = findStartingIndex?.endIndex
+        let modifiedURLAuthorizationCode = urlAuthorizationCode.substringFromIndex(startingIndex!)
+        let findEndingIndex = modifiedURLAuthorizationCode.rangeOfString("#")
+        let endingIndex = findEndingIndex?.startIndex
+        let authorizationCode = modifiedURLAuthorizationCode.substringToIndex(endingIndex!)
+        
+        print(authorizationCode)
+        
+        
+        let firstAccessCode = RetrieveAccessToken()
+        firstAccessCode.newAccessToken(authorizationCode) { (success) in
+            if success {
+                print("successfully saved access token")
+            }
+        }
+        
+        
+        return true
     }
 
 
