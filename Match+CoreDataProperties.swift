@@ -11,6 +11,7 @@
 
 import Foundation
 import CoreData
+import CloudKit
 
 extension Match {
 
@@ -25,4 +26,5 @@ extension Match {
     @NSManaged var started: NSNumber?
     @NSManaged var myName: String?
     @NSManaged var oppName: String?
+    @NSManaged var recordID: CKRecordID?
 }

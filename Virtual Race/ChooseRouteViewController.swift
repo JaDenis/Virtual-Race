@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 import CoreData
-
+import CloudKit
 
 class ChooseRouteViewController: UIViewController {
     
@@ -35,6 +35,7 @@ class ChooseRouteViewController: UIViewController {
         if oppID == NSUserDefaults.standardUserDefaults().objectForKey("myID") as? String {
             
             let startMatchAlert = UIAlertController(title: "Confirm the Start of a New Match", message: "you new match against yourself will start at midnight on \(oneDayfromNow)", preferredStyle: UIAlertControllerStyle.Alert)
+            
             startMatchAlert.addAction(UIAlertAction(title: "Start the match!", style: .Default, handler: { (action: UIAlertAction!) in
                 
                 let newMatch = Match(startDate: self.oneDayfromNow, myID: self.oppID, context: (self.delegate.stack?.context)!)
@@ -61,25 +62,64 @@ class ChooseRouteViewController: UIViewController {
         } else {
             
             let startMatchAlert = UIAlertController(title: "Confirm the Start of a New Match", message: "you new match against \(self.oppName) will start at midnight on \(oneDayfromNow)", preferredStyle: UIAlertControllerStyle.Alert)
+            
             startMatchAlert.addAction(UIAlertAction(title: "Start the match!", style: .Default, handler: { (action: UIAlertAction!) in
                 
-                let myID = NSUserDefaults.standardUserDefaults().objectForKey("myID") as? String!
+                let myID = NSUserDefaults.standardUserDefaults().objectForKey("myID") as! String
+                let myName = NSUserDefaults.standardUserDefaults().objectForKey("fullName") as? String
                 
-                let newMatch = Match(startDate: self.oneDayfromNow, myID: myID!, context: (self.delegate.stack?.context)!)
+                let newMatch = Match(startDate: self.oneDayfromNow, myID: myID, context: (self.delegate.stack?.context)!)
                 
-                newMatch.myName = NSUserDefaults.standardUserDefaults().objectForKey("fullName") as! String
-                newMatch.myAvatar = NSUserDefaults.standardUserDefaults().objectForKey("myAvatar") as! NSData
+                print("new match created")
+                
+                newMatch.myName = NSUserDefaults.standardUserDefaults().objectForKey("fullName") as? String
+                newMatch.myAvatar = NSUserDefaults.standardUserDefaults().objectForKey("myAvatar") as? NSData
                 newMatch.oppID = self.oppID
                 newMatch.oppName = self.oppName
                 newMatch.oppAvatar = self.oppAvatar
                 newMatch.finished = false
                 newMatch.started = false
                 
-                self.delegate.stack?.save()
+                print("new match finished")
                 
-                let controller: ViewMatchViewController
-                controller = self.storyboard!.instantiateViewControllerWithIdentifier("ViewMatchViewController") as! ViewMatchViewController
-                self.presentViewController(controller, animated: false, completion: nil)
+                print(myID)
+                
+                
+                let onlineRace = CKRecord(recordType: "match")
+                onlineRace["myID"] = myID
+                onlineRace["oppID"] = self.oppID
+                onlineRace["a" + myID] = 0.0
+                onlineRace["a" + self.oppID] = 0.0
+                onlineRace["started"] = false
+                onlineRace["finished"] = false
+                
+                let defaultContainer = CKContainer.defaultContainer()
+                let publicDB = defaultContainer.publicCloudDatabase
+                
+                print("now time to save the record")
+                
+                publicDB.saveRecord(onlineRace) { (record, error) -> Void in
+                    guard let record = record else {
+                        print("Error saving record: ", error)
+                        return
+                    }
+                    print("Successfully saved record: ", record)
+                    
+                    self.delegate.stack?.context.performBlock {
+                        print("saving to context")
+                    newMatch.recordID = record.recordID
+                    self.delegate.stack?.save()
+                    }
+                        
+                    let controller: ViewMatchViewController
+                    controller = self.storyboard!.instantiateViewControllerWithIdentifier("ViewMatchViewController") as! ViewMatchViewController
+                    self.presentViewController(controller, animated: false, completion: nil)
+                    
+                }
+                
+                
+                
+                
                 
                 }))
             
@@ -87,14 +127,5 @@ class ChooseRouteViewController: UIViewController {
         }
         
     }
-    
-    /*
-    let controller: MapViewController
-    controller = self.storyboard!.instantiateViewControllerWithIdentifier("MapViewController") as! MapViewController
-    
-    controller.startDate = oneDayfromNow
-    
-    self.presentViewController(controller, animated: false, completion: nil)
- */
     
 }

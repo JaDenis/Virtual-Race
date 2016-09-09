@@ -26,6 +26,7 @@
 		2E1F7B121D807EFE003BC6FB /* ViewMatchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E1F7B111D807EFE003BC6FB /* ViewMatchViewController.swift */; };
 		2E1F7B141D80834D003BC6FB /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E1F7B131D80834D003BC6FB /* CoreDataStack.swift */; };
 		2E1F7B161D80AB7F003BC6FB /* ChooseRouteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E1F7B151D80AB7F003BC6FB /* ChooseRouteViewController.swift */; };
+		2E21A1381D8328EF00551193 /* RaceRequestsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E21A1371D8328EF00551193 /* RaceRequestsViewController.swift */; };
 		2E7CD6271D81AFF300B9ACB5 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2E7CD6251D81AFF200B9ACB5 /* Model.xcdatamodeld */; };
 		2E7CD62A1D81B36C00B9ACB5 /* Match+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E7CD6281D81B36C00B9ACB5 /* Match+CoreDataProperties.swift */; };
 		2E7CD62B1D81B36C00B9ACB5 /* Match.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E7CD6291D81B36C00B9ACB5 /* Match.swift */; };
@@ -75,6 +76,8 @@
 		2E1F7B111D807EFE003BC6FB /* ViewMatchViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewMatchViewController.swift; sourceTree = "<group>"; };
 		2E1F7B131D80834D003BC6FB /* CoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CoreDataStack.swift; path = "../../Virtual Race - practice/Virtual Tourist/CoreDataStack.swift"; sourceTree = "<group>"; };
 		2E1F7B151D80AB7F003BC6FB /* ChooseRouteViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChooseRouteViewController.swift; sourceTree = "<group>"; };
+		2E21A1361D83036600551193 /* Model 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Model 3.xcdatamodel"; sourceTree = "<group>"; };
+		2E21A1371D8328EF00551193 /* RaceRequestsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RaceRequestsViewController.swift; sourceTree = "<group>"; };
 		2E7CD6261D81AFF300B9ACB5 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		2E7CD6281D81B36C00B9ACB5 /* Match+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Match+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		2E7CD6291D81B36C00B9ACB5 /* Match.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Match.swift; sourceTree = "<group>"; };
@@ -191,6 +194,7 @@
 			children = (
 				2E1F7AF61D8061A1003BC6FB /* LoginWebViewController.swift */,
 				2E1F7B151D80AB7F003BC6FB /* ChooseRouteViewController.swift */,
+				2E21A1371D8328EF00551193 /* RaceRequestsViewController.swift */,
 				2E1F7B0F1D806B89003BC6FB /* StartMatchViewController.swift */,
 				2E1F7B111D807EFE003BC6FB /* ViewMatchViewController.swift */,
 				2E1F7B031D8061ED003BC6FB /* MapViewController.swift */,
@@ -345,6 +349,7 @@
 				2E1F7AFD1D8061BD003BC6FB /* RetrieveFBDistance.swift in Sources */,
 				2E1F7AFB1D8061B7003BC6FB /* RetrieveAccessToken.swift in Sources */,
 				2E1F7AC91D806075003BC6FB /* AppDelegate.swift in Sources */,
+				2E21A1381D8328EF00551193 /* RaceRequestsViewController.swift in Sources */,
 				2E7CD62A1D81B36C00B9ACB5 /* Match+CoreDataProperties.swift in Sources */,
 				2E1F7B101D806B89003BC6FB /* StartMatchViewController.swift in Sources */,
 				2E1F7AF91D8061B1003BC6FB /* FBNetworking.swift in Sources */,
@@ -609,10 +614,11 @@
 		2E7CD6251D81AFF200B9ACB5 /* Model.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				2E21A1361D83036600551193 /* Model 3.xcdatamodel */,
 				2E7CD62F1D81C3AB00B9ACB5 /* Model 2.xcdatamodel */,
 				2E7CD6261D81AFF300B9ACB5 /* Model.xcdatamodel */,
 			);
-			currentVersion = 2E7CD62F1D81C3AB00B9ACB5 /* Model 2.xcdatamodel */;
+			currentVersion = 2E21A1361D83036600551193 /* Model 3.xcdatamodel */;
 			path = Model.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

@@ -16,6 +16,12 @@ class StartMatchViewController: UIViewController, UITableViewDataSource, UITable
     
     @IBOutlet weak var TableView: UITableView!
     
+    @IBAction func returnButton(sender: AnyObject) {
+        let controller: LoginWebViewController
+        controller = self.storyboard!.instantiateViewControllerWithIdentifier("LoginWebViewController") as! LoginWebViewController
+        self.presentViewController(controller, animated: false, completion: nil)
+    }
+    
     var friendList = [[String:AnyObject]]()
     var imageList = [NSData]()
     

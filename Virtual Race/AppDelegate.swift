@@ -29,7 +29,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
-        preloadData()
+       // NSUserDefaults.standardUserDefaults().setObject(nil, forKey: "Access Token")
+       // NSUserDefaults.standardUserDefaults().setObject(nil, forKey: "Refresh Token")
+       // preloadData()
         
         // Override point for customization after application launch.
         return true

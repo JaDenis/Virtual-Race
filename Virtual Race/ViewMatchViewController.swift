@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import CoreData
+import CloudKit
 
 
 
@@ -46,6 +47,7 @@ class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableV
         
         let row = raceList[indexPath.row] 
         
+        if row.started == true {
         
         let controller: MapViewController
         controller = self.storyboard!.instantiateViewControllerWithIdentifier("MapViewController") as! MapViewController
@@ -53,12 +55,15 @@ class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableV
         controller.match = row
         
         self.presentViewController(controller, animated: false, completion: nil)
-
+            
+        }
         
     }
     
     override func viewWillAppear(animated:Bool) {
         super.viewWillAppear(animated)
+        
+        
         
         let fr = NSFetchRequest(entityName: "Match")
         fr.sortDescriptors = [NSSortDescriptor(key: "startDate", ascending: true)]
@@ -71,9 +76,25 @@ class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableV
         }
         
         for i in fetchedResultsController.fetchedObjects! {
-            let managed = i as? NSManagedObject
-            let managed2 = managed as? Match
-            raceList.append(managed2!)
+            var t = i as? Match
+            if t!.started == nil {
+                let defaultContainer = CKContainer.defaultContainer()
+                let publicDB = defaultContainer.publicCloudDatabase
+                publicDB.fetchRecordWithID(t!.recordID!) { (record, error) -> Void in
+                    guard let record = record else {
+                        print("Error fetching record: ", error)
+                        return
+                    }
+                    print("Successfully fetched record: ", record)
+                    if record.objectForKey("started") as? Bool == true {
+                        print("match has been accepted")
+                        t!.started = true
+                        self.viewWillAppear(false)
+                    }
+                }
+            }
+            
+            raceList.append(i as! Match)
         }
     }
 
