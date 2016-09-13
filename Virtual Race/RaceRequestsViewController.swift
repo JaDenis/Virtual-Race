@@ -26,6 +26,7 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
     var requestList = [CKRecord]()
     var friendList = [[String:AnyObject]]()
     var imageList = [NSData]()
+    var oppName = String()
 
     var oneDayfromNow: NSDate {
         return NSCalendar.currentCalendar().dateByAddingUnit(.Day, value: 1, toDate: NSDate(), options: [])!
@@ -38,7 +39,8 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        print("creating new cell")
+        
+        let extraInfo = MapViewController()
      
         var oppAvatar = String()
         
@@ -46,6 +48,9 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
         
         
         let row = requestList[indexPath.row]
+        
+        let raceLocation = extraInfo.chooseRaceCourse((row.objectForKey("raceLocation") as? String)!)
+        
         
         for i in friendList {
             
@@ -65,8 +70,6 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
                 return cell
             }
             
-           
-
             
             if encodedID == row.objectForKey("myID") as! String {
                 print("found a match with my friends!")
@@ -74,9 +77,13 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
                     print("no opp avatar")
                     return cell
                 }
+                
+               self.oppName = name
                oppAvatar = avatar
                 
                 cell.textLabel?.text = "\(name) has challenged you to a race"
+                
+                cell.detailTextLabel!.text = "The race would start in \(raceLocation?.startingTitle) and end in \(raceLocation?.endingTitle)"
                 
                 let avatarURL = NSURL(string: oppAvatar)
                 
@@ -88,9 +95,6 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
             }
             
             
-            
-            
-            
         }
         
         
@@ -99,8 +103,6 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
-        print("did select row at index")
-        
         let row = requestList[indexPath.row]
         let myID = NSUserDefaults.standardUserDefaults().objectForKey("myID") as? String!
        
@@ -108,7 +110,7 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
         let publicDB = defaultContainer.publicCloudDatabase
 
         
-        let startMatchAlert = UIAlertController(title: "Confirm the Start of a New Match", message: "your new match against - will start at midnight on \(oneDayfromNow)", preferredStyle: UIAlertControllerStyle.Alert)
+        let startMatchAlert = UIAlertController(title: "Confirm the Start of a New Match", message: "your new match against \(self.oppName) will start at midnight on \(formatDate(oneDayfromNow))", preferredStyle: UIAlertControllerStyle.Alert)
         
         startMatchAlert.addAction(UIAlertAction(title: "Confirm", style: .Default, handler: {(action: UIAlertAction!) in
             
@@ -141,12 +143,13 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
                 newMatch.finished = false
                 newMatch.started = true
                 newMatch.recordID = row.recordID
+                newMatch.raceLocation = row.objectForKey("raceLocation") as? String
                 
+
+                row.setObject("true", forKey: "started")
+                row.setObject(self.oneDayfromNow, forKey: "startDate")
                 
-                let onlineRace = CKRecord(recordType: "match", recordID: row.recordID)
-                onlineRace.setObject(true, forKey: "started")
-                
-                publicDB.saveRecord(onlineRace) { (record, error) -> Void in
+                publicDB.saveRecord(row) { (record, error) -> Void in
                     guard let record = record else {
                         print("Error saving record: ", error)
                         return
@@ -166,13 +169,24 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
             
         }))
 
-        
-        
-        
         startMatchAlert.addAction(UIAlertAction(title: "Cancel", style: .Cancel, handler: {(action: UIAlertAction!) in
             
             print("cancel pushed")
         }))
+        
+        /*
+        startMatchAlert.addAction(UIAlertAction(title: "Reject", style: .Default, handler: {(action: UIAlertAction!) in
+            publicDB.deleteRecordWithID(row.recordID) { (recordID, error) in
+                NSLog("OK or \(error)")
+                print("\(recordID) successfully deleted")
+                
+                self.friendList.removeAtIndex(indexPath.row)
+                
+                self.tableView.reloadData()
+            }
+            
+            }))
+ */
 
         self.presentViewController(startMatchAlert, animated: true, completion: nil)
         
@@ -183,15 +197,23 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
         
         
         let friends = retrieveFBFriends()
-        friends.getFriends() { (friendsList) in
+        friends.getFriends() { (friendsList, error) in
             
-            self.friendList = friendsList
+            guard (error == nil) else {
+                print("There was an error with your request: \(error)")
+                friends.getFriends() { (friendsList, error) in
+                    self.friendList = friendsList!
+                }
+                return
+            }
+
             
+            self.friendList = friendsList!
             
             let defaultContainer = CKContainer.defaultContainer()
             let publicDB = defaultContainer.publicCloudDatabase
             let predicate1 = NSPredicate(format: "%K == %@", "oppID", (NSUserDefaults.standardUserDefaults().objectForKey("myID") as? String!)!)
-            let predicate2 = NSPredicate(format: "%K == %@", "started", false)
+            let predicate2 = NSPredicate(format: "%K == %@", "started", "false")
              let andPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [predicate1, predicate2])
             let query = CKQuery(recordType: "match", predicate: andPredicate)
             
@@ -201,13 +223,13 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
                     print("Error querying records: ", error)
                     return
                 }
-                print("Race requests Found \(records.count) records matching query")
+                
                 self.requestList = records
-                performUIUpdatesOnMain{
-                self.tableView.reloadData()
-                }
+                
             }
-            
+            performUIUpdatesOnMain{
+                self.tableView.reloadData()
+            }
         }
 
         }

@@ -29,9 +29,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
-       // NSUserDefaults.standardUserDefaults().setObject(nil, forKey: "Access Token")
-       // NSUserDefaults.standardUserDefaults().setObject(nil, forKey: "Refresh Token")
-       // preloadData()
+      //  NSUserDefaults.standardUserDefaults().setObject(nil, forKey: "Access Token")
+      //  NSUserDefaults.standardUserDefaults().setObject(nil, forKey: "Refresh Token")
+      //  preloadData()
         
         // Override point for customization after application launch.
         return true
@@ -63,6 +63,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(app: UIApplication, openURL url: NSURL, options: [String : AnyObject]) -> Bool {
         
+        
         let urlAuthorizationCode = String(url)
         
         let findStartingIndex = urlAuthorizationCode.rangeOfString("=")
@@ -72,20 +73,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let endingIndex = findEndingIndex?.startIndex
         let authorizationCode = modifiedURLAuthorizationCode.substringToIndex(endingIndex!)
         
-        print(authorizationCode)
-        
         
         let firstAccessCode = RetrieveAccessToken()
         firstAccessCode.newAccessToken(authorizationCode) { (success) in
             if success {
-                print("successfully saved access token")
+                firstAccessCode.retrieveData { (success) in
+                    
+                    
+                }
             }
         }
         
         
-        return true
+        return false
     }
 
+    
 
 }
 

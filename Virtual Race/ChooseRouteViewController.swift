@@ -13,6 +13,22 @@ import CloudKit
 
 class ChooseRouteViewController: UIViewController {
     
+    @IBAction func libertyTrail(sender: AnyObject) {
+        chooseRace("3")
+    }
+    
+    
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    
+    @IBAction func returnButton(sender: AnyObject) {
+        let controller: UITabBarController
+        controller = self.storyboard!.instantiateViewControllerWithIdentifier("RacesViewController") as! UITabBarController
+        self.presentViewController(controller, animated: false, completion: nil)
+    }
+    
+    @IBAction func ShermansMarchTrail(sender: AnyObject) {
+        chooseRace("2")
+    }
     var fetchedResultsController: NSFetchedResultsController!
     let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
@@ -24,17 +40,18 @@ class ChooseRouteViewController: UIViewController {
         return NSCalendar.currentCalendar().dateByAddingUnit(.Day, value: 1, toDate: NSDate(), options: [])!
     }
     
-    @IBAction func chooseRoute(sender: AnyObject) {
-        
-       /* let dateFormatter = NSDateFormatter()
-        dateFormatter.locale = NSLocale.currentLocale()
-        dateFormatter.dateFormat = "yyyy/MM/dd"
-        let convertedDate = dateFormatter.stringFromDate(oneDayfromNow)
- */
-        
+    
+    
+    @IBAction func YorkvilletoOswego(sender: AnyObject) {
+        chooseRace("1")
+    }
+    
+    
+    func chooseRace(raceID: String) {
+        print("choose race function called")
         if oppID == NSUserDefaults.standardUserDefaults().objectForKey("myID") as? String {
             
-            let startMatchAlert = UIAlertController(title: "Confirm the Start of a New Match", message: "you new match against yourself will start at midnight on \(oneDayfromNow)", preferredStyle: UIAlertControllerStyle.Alert)
+            let startMatchAlert = UIAlertController(title: "Confirm the Start of a New Match", message: "you new match against yourself will start at midnight on \(formatDate(oneDayfromNow))", preferredStyle: UIAlertControllerStyle.Alert)
             
             startMatchAlert.addAction(UIAlertAction(title: "Start the match!", style: .Default, handler: { (action: UIAlertAction!) in
                 
@@ -44,6 +61,8 @@ class ChooseRouteViewController: UIViewController {
                 newMatch.myName = NSUserDefaults.standardUserDefaults().objectForKey("fullName") as? String
                 newMatch.finished = false
                 newMatch.started = true
+                newMatch.raceLocation = raceID
+                newMatch.finishDate = nil
                 
                 self.delegate.stack?.save()
                 
@@ -59,11 +78,16 @@ class ChooseRouteViewController: UIViewController {
             }))
             
             self.presentViewController(startMatchAlert, animated: true, completion: nil)
+            
         } else {
             
-            let startMatchAlert = UIAlertController(title: "Confirm the Start of a New Match", message: "you new match against \(self.oppName) will start at midnight on \(oneDayfromNow)", preferredStyle: UIAlertControllerStyle.Alert)
+            let startMatchAlert = UIAlertController(title: "Confirm the Start of a New Match", message: "you new match against \(self.oppName) will start at midnight on \(formatDate(oneDayfromNow))", preferredStyle: UIAlertControllerStyle.Alert)
             
             startMatchAlert.addAction(UIAlertAction(title: "Start the match!", style: .Default, handler: { (action: UIAlertAction!) in
+                
+                performUIUpdatesOnMain{
+                    self.activityIndicator.startAnimating()
+                }
                 
                 let myID = NSUserDefaults.standardUserDefaults().objectForKey("myID") as! String
                 let myName = NSUserDefaults.standardUserDefaults().objectForKey("fullName") as? String
@@ -79,19 +103,22 @@ class ChooseRouteViewController: UIViewController {
                 newMatch.oppAvatar = self.oppAvatar
                 newMatch.finished = false
                 newMatch.started = false
-                
-                print("new match finished")
-                
-                print(myID)
+                newMatch.raceLocation = raceID
+                newMatch.winner = nil
+                newMatch.finishDate = nil
                 
                 
                 let onlineRace = CKRecord(recordType: "match")
                 onlineRace["myID"] = myID
                 onlineRace["oppID"] = self.oppID
-                onlineRace["a" + myID] = 0.0
-                onlineRace["a" + self.oppID] = 0.0
-                onlineRace["started"] = false
-                onlineRace["finished"] = false
+                onlineRace["d" + myID] = 0.0
+                onlineRace["d" + self.oppID] = 0.0
+                onlineRace["started"] = "false"
+                onlineRace["finished"] = "false"
+                onlineRace["startDate"] = self.oneDayfromNow
+                onlineRace["finishDate"] = ""
+                onlineRace["winner"] = ""
+                onlineRace["raceLocation"] = raceID
                 
                 let defaultContainer = CKContainer.defaultContainer()
                 let publicDB = defaultContainer.publicCloudDatabase
@@ -107,25 +134,24 @@ class ChooseRouteViewController: UIViewController {
                     
                     self.delegate.stack?.context.performBlock {
                         print("saving to context")
-                    newMatch.recordID = record.recordID
-                    self.delegate.stack?.save()
+                        newMatch.recordID = record.recordID
+                        self.delegate.stack?.save()
                     }
-                        
+                    
                     let controller: ViewMatchViewController
                     controller = self.storyboard!.instantiateViewControllerWithIdentifier("ViewMatchViewController") as! ViewMatchViewController
                     self.presentViewController(controller, animated: false, completion: nil)
                     
                 }
                 
-                
-                
-                
-                
+            }))
+            
+              startMatchAlert.addAction(UIAlertAction(title: "Cancel", style: .Cancel, handler: { (action: UIAlertAction!) in
+                        print("cancel pressed")
                 }))
             
             self.presentViewController(startMatchAlert, animated: true, completion: nil)
         }
-        
     }
     
 }

@@ -27,4 +27,7 @@ extension Match {
     @NSManaged var myName: String?
     @NSManaged var oppName: String?
     @NSManaged var recordID: CKRecordID?
+    @NSManaged var raceLocation: String?
+    @NSManaged var finishDate: String?
+    @NSManaged var winner: String?
 }

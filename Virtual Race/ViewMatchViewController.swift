@@ -16,6 +16,17 @@ import CloudKit
 
 class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
+    @IBAction func returnButton(sender: AnyObject) {
+        let controller: LoginWebViewController
+        controller = self.storyboard!.instantiateViewControllerWithIdentifier("LoginWebViewController") as! LoginWebViewController
+        self.presentViewController(controller, animated: false, completion: nil)
+
+    }
+    
+
+    
+    @IBOutlet weak var tableView: UITableView!
+    
     var fetchedResultsController: NSFetchedResultsController!
     let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
 
@@ -29,18 +40,67 @@ class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableV
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
+        let extraInfo = MapViewController()
+        
+        
+        
+        var avatarImage = NSData()
+        
         let cell = tableView.dequeueReusableCellWithIdentifier("memeCell")!
         
+        let row = raceList[indexPath.row]
+        
+        let raceLocation = extraInfo.chooseRaceCourse(row.raceLocation!)!
         
         
-        let avatarImage = raceList[indexPath.row].myAvatar
+        if row.oppAvatar == nil {
+        avatarImage = row.myAvatar!
+        cell.textLabel!.text = "Racing from \(raceLocation.startingTitle) to \(raceLocation.endingTitle)"
+        } else {
+        avatarImage = row.oppAvatar!
+        cell.textLabel?.text = "Racing \(row.oppName!) from \(raceLocation.startingTitle) to \(raceLocation.endingTitle)"
+        }
         
         
-        cell.imageView!.image = UIImage(data: avatarImage!)
-        cell.textLabel?.text = raceList[indexPath.row].myName
+        cell.imageView!.image = UIImage(data: avatarImage)
+        
+        if row.finished == true {
+            
+            cell.detailTextLabel?.text = "Status: The race is over! \(row.winner) finished 1st on \(row.finishDate)"
+            
+        } else if row.started == true  {
+            
+        cell.detailTextLabel!.text = "Status: Race start date: \(formatDate(row.startDate!))"
+            
+        } else {
+            
+            print("race status is not started")
+            
+            let defaultContainer = CKContainer.defaultContainer()
+            let publicDB = defaultContainer.publicCloudDatabase
+            publicDB.fetchRecordWithID(row.recordID!) { (record, error) -> Void in
+                guard let record = record else {
+                    print("Error fetching record: ", error)
+                    return
+                }
+                
+                if record.objectForKey("started") as? String == "false" {
+                    print("server shows the race has still not started")
+                    performUIUpdatesOnMain{
+                    cell.detailTextLabel!.text = "Status: Waiting for your race request to be accepted"
+                    }
+                } else {
+                    row.started = true
+                    row.startDate = record.objectForKey("startDate") as? NSDate
+                    performUIUpdatesOnMain{
+                    cell.detailTextLabel!.text = "Status: Race started on \(formatDate(row.startDate!))"
+                    }
+                }
+            }
+            
+        }
 
         return cell
-        
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
@@ -63,9 +123,10 @@ class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableV
     override func viewWillAppear(animated:Bool) {
         super.viewWillAppear(animated)
         
+        self.raceList.removeAll()
         
         
-        let fr = NSFetchRequest(entityName: "Match")
+        var fr = NSFetchRequest(entityName: "Match")
         fr.sortDescriptors = [NSSortDescriptor(key: "startDate", ascending: true)]
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fr, managedObjectContext: (delegate.stack?.context)!, sectionNameKeyPath: nil, cacheName: nil)
         
@@ -76,26 +137,53 @@ class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableV
         }
         
         for i in fetchedResultsController.fetchedObjects! {
-            var t = i as? Match
-            if t!.started == nil {
+            let t = i as? Match
+            
+            if t!.started == false {
                 let defaultContainer = CKContainer.defaultContainer()
                 let publicDB = defaultContainer.publicCloudDatabase
                 publicDB.fetchRecordWithID(t!.recordID!) { (record, error) -> Void in
-                    guard let record = record else {
-                        print("Error fetching record: ", error)
+                    
+                    
+                    guard error == nil else {
+                        
                         return
                     }
-                    print("Successfully fetched record: ", record)
-                    if record.objectForKey("started") as? Bool == true {
-                        print("match has been accepted")
+                    
+                    guard let record = record else {
+                        print("the race has been rejected")
+                        return
+                    }
+                    
+                    if record.objectForKey("started") as? String == "true" {
                         t!.started = true
-                        self.viewWillAppear(false)
                     }
                 }
             }
             
-            raceList.append(i as! Match)
+            if t?.started == true && t?.recordID != nil {
+            let defaultContainer = CKContainer.defaultContainer()
+            let publicDB = defaultContainer.publicCloudDatabase
+            publicDB.fetchRecordWithID(t!.recordID!) { (record, error) -> Void in
+                guard let record = record else {
+                    print("Error fetching record: ", error)
+                    return
+                }
+                if record.objectForKey("finished") as? String == "true" {
+                    t!.finished = true
+                    t!.winner = record.objectForKey("winner") as? String
+                    t!.finishDate = record.objectForKey("finishDate") as? String
+                }
+            }
+            }
+            
+            raceList.append(t!)
+            
         }
+        
+        
+            self.tableView.reloadData()
+        
     }
 
 

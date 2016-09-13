@@ -11,7 +11,9 @@ import Foundation
 
 class retrieveFBFriends {
     
-    func getFriends(completionHanlder: (friendList: [[String:AnyObject]]) -> Void ) {
+    func getFriends(completionHandler: (friendList: [[String:AnyObject]]?, error: String?) -> Void ) {
+        
+        print("get friends")
         
         let accessToken = NSUserDefaults.standardUserDefaults().objectForKey("Access Token") as? String
         
@@ -22,16 +24,25 @@ class retrieveFBFriends {
         
         processRequest(request) { (result, error) in
             
-            guard let friends = result["friends"] as? [[String:AnyObject]] else {
-                print("no friends list")
+            if error == "Your Udacity post request returned a status code other than 2xx! Optional(401)" {
+                print("need refresh token")
+                let refresh = RetrieveAccessToken()
+                refresh.refreshAccessToken() { (success) in
+                completionHandler(friendList: nil, error: "need refresh")
+                }
+            }
+            
+            guard let results = result else {
                 return
             }
             
+            guard let friends = results["friends"] as? [[String:AnyObject]] else {
+                print("no friends list")
+                return
+            }
+
             
-            
-         //   print(friends)
-            
-            completionHanlder(friendList: friends)
+            completionHandler(friendList: friends, error: nil)
         }
     }
     

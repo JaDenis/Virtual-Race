@@ -27,7 +27,7 @@ class StartMatchViewController: UIViewController, UITableViewDataSource, UITable
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        print(friendList.count)
+        
         return friendList.count
     }
     
@@ -110,10 +110,19 @@ class StartMatchViewController: UIViewController, UITableViewDataSource, UITable
     override func viewWillAppear(animated:Bool) {
         super.viewWillAppear(animated)
         
+        
+        
         let friends = retrieveFBFriends()
-        friends.getFriends() { (friendsList) in
+        friends.getFriends() { (friendsList, error) in
             
-            self.friendList = friendsList
+            guard (error == nil) else {
+                print("There was an error with your request: \(error)")
+                friends.getFriends() { (friendsList, error) in
+                }
+                return
+            }
+
+            self.friendList = friendsList!
             
             let avatar = NSUserDefaults.standardUserDefaults().URLForKey("avatar")
             let encodedID = NSUserDefaults.standardUserDefaults().objectForKey("myID") as! String
