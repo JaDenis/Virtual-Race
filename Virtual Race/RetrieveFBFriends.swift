@@ -24,13 +24,12 @@ class retrieveFBFriends {
         
         processRequest(request) { (result, error) in
             
+            
             if error == "Your Udacity post request returned a status code other than 2xx! Optional(401)" {
                 print("need refresh token")
-                let refresh = RetrieveAccessToken()
-                refresh.refreshAccessToken() { (success) in
-                completionHandler(friendList: nil, error: "need refresh")
-                }
+                completionHandler(friendList: nil, error: "Need Refresh Token")
             }
+ 
             
             guard let results = result else {
                 return

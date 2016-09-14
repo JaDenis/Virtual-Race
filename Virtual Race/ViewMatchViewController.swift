@@ -64,10 +64,14 @@ class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableV
         
         cell.imageView!.image = UIImage(data: avatarImage)
         
-        if row.finished == true {
+        if row.finished == true && row.oppID == nil {
+            
+            cell.detailTextLabel?.text = "Status: The race is over! You started on \(row.startDate) and finished on \(row.finishDate)"
+            
+        } else if row.finished == true && row.oppID != nil {
             
             cell.detailTextLabel?.text = "Status: The race is over! \(row.winner) finished 1st on \(row.finishDate)"
-            
+        
         } else if row.started == true  {
             
         cell.detailTextLabel!.text = "Status: Race start date: \(formatDate(row.startDate!))"
@@ -180,7 +184,6 @@ class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableV
             raceList.append(t!)
             
         }
-        
         
             self.tableView.reloadData()
         

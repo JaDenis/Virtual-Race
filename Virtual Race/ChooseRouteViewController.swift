@@ -94,8 +94,6 @@ class ChooseRouteViewController: UIViewController {
                 
                 let newMatch = Match(startDate: self.oneDayfromNow, myID: myID, context: (self.delegate.stack?.context)!)
                 
-                print("new match created")
-                
                 newMatch.myName = NSUserDefaults.standardUserDefaults().objectForKey("fullName") as? String
                 newMatch.myAvatar = NSUserDefaults.standardUserDefaults().objectForKey("myAvatar") as? NSData
                 newMatch.oppID = self.oppID

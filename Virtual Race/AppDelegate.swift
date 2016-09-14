@@ -29,9 +29,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
-      //  NSUserDefaults.standardUserDefaults().setObject(nil, forKey: "Access Token")
-      //  NSUserDefaults.standardUserDefaults().setObject(nil, forKey: "Refresh Token")
-      //  preloadData()
+     //   NSUserDefaults.standardUserDefaults().setObject(nil, forKey: "Access Token")
+       // NSUserDefaults.standardUserDefaults().setObject(nil, forKey: "Refresh Token")
+       // preloadData()
         
         // Override point for customization after application launch.
         return true
@@ -53,7 +53,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationDidBecomeActive(application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        
+        
+        
+        if self.window!.rootViewController is MapViewController {
+            print("refresh mapviewcontroller")
+            let mapRefresh = MapViewController()
+            mapRefresh.viewDidLoad()
+        }
+        
+            
+      
     }
+    
 
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
@@ -66,29 +78,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         let urlAuthorizationCode = String(url)
         
+        print("first url \(urlAuthorizationCode)")
+        
         let findStartingIndex = urlAuthorizationCode.rangeOfString("=")
         let startingIndex = findStartingIndex?.endIndex
         let modifiedURLAuthorizationCode = urlAuthorizationCode.substringFromIndex(startingIndex!)
-        let findEndingIndex = modifiedURLAuthorizationCode.rangeOfString("#")
+        let findEndingIndex = modifiedURLAuthorizationCode.rangeOfString("&")
         let endingIndex = findEndingIndex?.startIndex
         let authorizationCode = modifiedURLAuthorizationCode.substringToIndex(endingIndex!)
         
         
-        let firstAccessCode = RetrieveAccessToken()
-        firstAccessCode.newAccessToken(authorizationCode) { (success) in
-            if success {
-                firstAccessCode.retrieveData { (success) in
-                    
-                    
-                }
-            }
-        }
+        NSUserDefaults.standardUserDefaults().setObject(authorizationCode, forKey: "Access Token")
         
+ 
         
-        return false
+        return true
+
+ 
     }
-
-    
-
 }
 
