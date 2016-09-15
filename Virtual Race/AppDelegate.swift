@@ -29,9 +29,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
-     //   NSUserDefaults.standardUserDefaults().setObject(nil, forKey: "Access Token")
-       // NSUserDefaults.standardUserDefaults().setObject(nil, forKey: "Refresh Token")
-       // preloadData()
+       
+        
+  //      NSUserDefaults.standardUserDefaults().setObject(nil, forKey: "Access Token")
+    //    NSUserDefaults.standardUserDefaults().setObject(nil, forKey: "Refresh Token")
+      //  preloadData()
+
+        UINavigationBar.appearance().setBackgroundImage(UIImage(), forBarPosition: UIBarPosition.Any, barMetrics: UIBarMetrics.Default)
+        UINavigationBar.appearance().shadowImage = UIImage()
+        UINavigationBar.appearance().tintColor = UIColor.blueColor()
+       // UINavigationBar.appearance().barTintColor = UIColor.redColor()
+        UINavigationBar.appearance().translucent = false
+        UINavigationBar.appearance().clipsToBounds = false
         
         // Override point for customization after application launch.
         return true
@@ -54,31 +63,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidBecomeActive(application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
         
-        
-        
-        if self.window!.rootViewController is MapViewController {
-            print("refresh mapviewcontroller")
-            let mapRefresh = MapViewController()
-            mapRefresh.viewDidLoad()
-        }
-        
-            
-      
     }
     
+
 
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
+    
 
-    
-    
     func application(app: UIApplication, openURL url: NSURL, options: [String : AnyObject]) -> Bool {
         
-        
+     
+        NSNotificationCenter.defaultCenter().postNotificationName(kCloseSafariViewControllerNotification, object: url)
+   
+     /*
         let urlAuthorizationCode = String(url)
-        
-        print("first url \(urlAuthorizationCode)")
         
         let findStartingIndex = urlAuthorizationCode.rangeOfString("=")
         let startingIndex = findStartingIndex?.endIndex
@@ -89,9 +89,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         
         NSUserDefaults.standardUserDefaults().setObject(authorizationCode, forKey: "Access Token")
-        
+
+            */
  
-        
         return true
 
  

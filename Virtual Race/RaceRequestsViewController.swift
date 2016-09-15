@@ -15,6 +15,10 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
     
     @IBOutlet weak var tableView: UITableView!
     
+    @IBAction func refresh(sender: AnyObject) {
+        viewWillAppear(false)
+    }
+    
     @IBAction func returnButton(sender: AnyObject) {
         let controller: LoginWebViewController
         controller = self.storyboard!.instantiateViewControllerWithIdentifier("LoginWebViewController") as! LoginWebViewController
@@ -83,7 +87,7 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
                 
                 cell.textLabel?.text = "\(name) has challenged you to a race"
                 
-                cell.detailTextLabel!.text = "The race would start in \(raceLocation?.startingTitle) and end in \(raceLocation?.endingTitle)"
+                cell.detailTextLabel!.text = "The race would start in \(raceLocation!.startingTitle) and end in \(raceLocation!.endingTitle)"
                 
                 let avatarURL = NSURL(string: oppAvatar)
                 
@@ -174,19 +178,25 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
             print("cancel pushed")
         }))
         
-        /*
-        startMatchAlert.addAction(UIAlertAction(title: "Reject", style: .Default, handler: {(action: UIAlertAction!) in
-            publicDB.deleteRecordWithID(row.recordID) { (recordID, error) in
-                NSLog("OK or \(error)")
-                print("\(recordID) successfully deleted")
-                
-                self.friendList.removeAtIndex(indexPath.row)
-                
-                self.tableView.reloadData()
+        
+        startMatchAlert.addAction(UIAlertAction(title: "Deny", style: .Default, handler: {(action: UIAlertAction!) in
+            
+            row.setObject("true", forKey: "rejected")
+            
+            publicDB.saveRecord(row) { (record, error) -> Void in
+                guard let record = record else {
+                    print("Error saving record: ", error)
+                    return
+                }
+                print("Successfully saved record: ", record)
             }
             
+            performUIUpdatesOnMain{
+                self.tableView.reloadData()
+            }
+
             }))
- */
+ 
 
         self.presentViewController(startMatchAlert, animated: true, completion: nil)
         
@@ -214,7 +224,8 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
             let publicDB = defaultContainer.publicCloudDatabase
             let predicate1 = NSPredicate(format: "%K == %@", "oppID", (NSUserDefaults.standardUserDefaults().objectForKey("myID") as? String!)!)
             let predicate2 = NSPredicate(format: "%K == %@", "started", "false")
-             let andPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [predicate1, predicate2])
+            let predicate3 = NSPredicate(format: "%K == %@", "rejected", "false")
+             let andPredicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [predicate1, predicate2, predicate3])
             let query = CKQuery(recordType: "match", predicate: andPredicate)
             
             publicDB.performQuery(query, inZoneWithID: nil) {
@@ -226,11 +237,16 @@ class RaceRequestsViewController: UIViewController, UITableViewDataSource, UITab
                 
                 self.requestList = records
                 
+                performUIUpdatesOnMain{
+                    print("table updated")
+                    self.tableView.reloadData()
+                }
+                
             }
-            performUIUpdatesOnMain{
-                self.tableView.reloadData()
-            }
+            
         }
+        
+        
 
         }
         

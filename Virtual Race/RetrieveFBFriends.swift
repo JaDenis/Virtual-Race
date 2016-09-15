@@ -9,7 +9,9 @@
 import Foundation
 
 
+
 class retrieveFBFriends {
+    
     
     func getFriends(completionHandler: (friendList: [[String:AnyObject]]?, error: String?) -> Void ) {
         
@@ -39,7 +41,8 @@ class retrieveFBFriends {
                 print("no friends list")
                 return
             }
-
+            
+            
             
             completionHandler(friendList: friends, error: nil)
         }

@@ -13,7 +13,7 @@ func formatDate(date: NSDate) -> String {
     
     let dateFormatter = NSDateFormatter()
     dateFormatter.locale = NSLocale.currentLocale()
-    dateFormatter.dateFormat = "yyyy/MM/dd"
+    dateFormatter.dateFormat = "yyyy-MM-dd"
     let convertedDate = dateFormatter.stringFromDate(date)
     
     return convertedDate

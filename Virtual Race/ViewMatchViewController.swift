@@ -64,13 +64,20 @@ class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableV
         
         cell.imageView!.image = UIImage(data: avatarImage)
         
+        
+        
         if row.finished == true && row.oppID == nil {
             
-            cell.detailTextLabel?.text = "Status: The race is over! You started on \(row.startDate) and finished on \(row.finishDate)"
+            cell.detailTextLabel?.text = "Status: The race is over! You started on \(formatDate(row.startDate!)) and finished on \(row.finishDate!)"
+            
+        } else if row.finished == true && row.winner == "N/A" {
+            
+            cell.textLabel?.text = "\(row.oppName!) has declined this particular race"
+            cell.detailTextLabel?.text = "The race was from \(raceLocation.startingTitle) to \(raceLocation.endingTitle)"
             
         } else if row.finished == true && row.oppID != nil {
             
-            cell.detailTextLabel?.text = "Status: The race is over! \(row.winner) finished 1st on \(row.finishDate)"
+            cell.detailTextLabel?.text = "Status: The race is over! \(row.winner!) finished 1st on \(row.finishDate!)"
         
         } else if row.started == true  {
             
@@ -124,13 +131,62 @@ class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableV
         
     }
     
+    var deleteMatchIndexPath: NSIndexPath? = nil
+    
+    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        if editingStyle == .Delete {
+            deleteMatchIndexPath = indexPath
+            let matchToDelete = raceList[indexPath.row]
+            confirmDelete(matchToDelete)
+        }
+    }
+    
+    func confirmDelete(match: Match) {
+        let alert = UIAlertController(title: "Hide Race Request", message: "Are you sure you want to permanently hide this request?", preferredStyle: .ActionSheet)
+        
+        let DeleteAction = UIAlertAction(title: "Delete", style: .Destructive, handler: handleDeletePlanet)
+        let CancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: cancelDeletePlanet)
+        
+        alert.addAction(DeleteAction)
+        alert.addAction(CancelAction)
+    
+        
+        self.presentViewController(alert, animated: true, completion: nil)
+    }
+    
+    func handleDeletePlanet(alertAction: UIAlertAction!) -> Void {
+        if let indexPath = deleteMatchIndexPath {
+            tableView.beginUpdates()
+            
+            delegate.stack?.context.deleteObject(raceList[indexPath.row])
+            
+            raceList.removeAtIndex(indexPath.row)
+            
+            
+            delegate.stack?.save()
+            
+            // Note that indexPath is wrapped in an array:  [indexPath]
+            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+            
+            deleteMatchIndexPath = nil
+            
+            tableView.endUpdates()
+        }
+    }
+    
+    func cancelDeletePlanet(alertAction: UIAlertAction!) {
+        deleteMatchIndexPath = nil
+    }
+    
     override func viewWillAppear(animated:Bool) {
         super.viewWillAppear(animated)
+        
+        print("view races loaded")
         
         self.raceList.removeAll()
         
         
-        var fr = NSFetchRequest(entityName: "Match")
+        let fr = NSFetchRequest(entityName: "Match")
         fr.sortDescriptors = [NSSortDescriptor(key: "startDate", ascending: true)]
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fr, managedObjectContext: (delegate.stack?.context)!, sectionNameKeyPath: nil, cacheName: nil)
         
@@ -150,7 +206,6 @@ class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableV
                     
                     
                     guard error == nil else {
-                        
                         return
                     }
                     
@@ -161,6 +216,12 @@ class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableV
                     
                     if record.objectForKey("started") as? String == "true" {
                         t!.started = true
+                    }
+                    
+                    if record.objectForKey("rejected") as! String == "true" {
+                        print("race has been rejected")
+                        t!.finished = true
+                        t!.winner = "N/A"
                     }
                 }
             }
@@ -178,7 +239,7 @@ class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableV
                     t!.winner = record.objectForKey("winner") as? String
                     t!.finishDate = record.objectForKey("finishDate") as? String
                 }
-            }
+                }
             }
             
             raceList.append(t!)
@@ -186,8 +247,6 @@ class ViewMatchViewController: UIViewController, UITableViewDataSource, UITableV
         }
         
             self.tableView.reloadData()
-        
     }
-
 
 }

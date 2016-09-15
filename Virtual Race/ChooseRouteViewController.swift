@@ -90,7 +90,6 @@ class ChooseRouteViewController: UIViewController {
                 }
                 
                 let myID = NSUserDefaults.standardUserDefaults().objectForKey("myID") as! String
-                let myName = NSUserDefaults.standardUserDefaults().objectForKey("fullName") as? String
                 
                 let newMatch = Match(startDate: self.oneDayfromNow, myID: myID, context: (self.delegate.stack?.context)!)
                 
@@ -104,6 +103,7 @@ class ChooseRouteViewController: UIViewController {
                 newMatch.raceLocation = raceID
                 newMatch.winner = nil
                 newMatch.finishDate = nil
+    
                 
                 
                 let onlineRace = CKRecord(recordType: "match")
@@ -117,6 +117,7 @@ class ChooseRouteViewController: UIViewController {
                 onlineRace["finishDate"] = ""
                 onlineRace["winner"] = ""
                 onlineRace["raceLocation"] = raceID
+                onlineRace["rejected"] = "false"
                 
                 let defaultContainer = CKContainer.defaultContainer()
                 let publicDB = defaultContainer.publicCloudDatabase

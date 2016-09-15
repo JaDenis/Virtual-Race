@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import CloudKit
 
 
 
@@ -15,6 +16,8 @@ import UIKit
 class StartMatchViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     
     @IBOutlet weak var TableView: UITableView!
+    
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     @IBAction func returnButton(sender: AnyObject) {
         let controller: LoginWebViewController
@@ -53,17 +56,31 @@ class StartMatchViewController: UIViewController, UITableViewDataSource, UITable
             return cell
         }
         
+        guard let encodedID = user["encodedId"] as? String else {
+            print("no encoded ID")
+            return cell
+        }
         
-        let avatarURL = NSURL(string: avatar)
         
-        let avatarImage = NSData(contentsOfURL: (avatarURL)!)
         
-        self.imageList.insert(avatarImage!, atIndex: indexPath.row)
+   //     let avatarURL = NSURL(string: avatar)
         
-        cell.imageView!.image = UIImage(data: avatarImage!)
+   //     let avatarImage = NSData(contentsOfURL: (avatarURL)!)
+        
+  //      self.imageList.insert(avatarImage!, atIndex: indexPath.row)
+        
+        
+  //      cell.imageView!.image = UIImage(data: avatarImage!)
+        
+        
+        
+        cell.imageView!.image = UIImage(data: self.imageList[indexPath.row])
+            
         
         cell.textLabel?.text = name
-        
+            
+ 
+ 
         return cell
     }
     
@@ -101,7 +118,7 @@ class StartMatchViewController: UIViewController, UITableViewDataSource, UITable
         self.presentViewController(controller, animated: false, completion: nil)
         } else {
             
-            let iCloudAlert = UIAlertController(title: "Action Denied", message: "Your IOS device must be signed into an iCloud account to participate in multiplayer races. Exit the Virtual Race app, go to settings, and sign into iCloud for multiplayer races.", preferredStyle: UIAlertControllerStyle.Alert)
+            let iCloudAlert = UIAlertController(title: "Action Denied", message: "Your IOS device must be signed into an iCloud account to participate in multiplayer races. Exit the Virtual Race app, go to settings, and sign into your iCloud, make sure Virtual Race has permission to use your iCloud account in the iCloud Drive settings.", preferredStyle: UIAlertControllerStyle.Alert)
             
             iCloudAlert.addAction(UIAlertAction(title: "OK", style: .Cancel, handler: { (action: UIAlertAction!) in
                 
@@ -116,6 +133,7 @@ class StartMatchViewController: UIViewController, UITableViewDataSource, UITable
     override func viewWillAppear(animated:Bool) {
         super.viewWillAppear(animated)
         
+        self.activityIndicator.startAnimating()
         
         let friends = retrieveFBFriends()
         
@@ -136,22 +154,49 @@ class StartMatchViewController: UIViewController, UITableViewDataSource, UITable
                 }
                 return
             }
+            
+            
 
             self.friendList = friendsList!
             
             let avatar = String(NSUserDefaults.standardUserDefaults().URLForKey("avatar")!)
             let encodedID = NSUserDefaults.standardUserDefaults().objectForKey("myID") as! String
             
-            
+
             self.friendList.insert((["user": ["avatar": avatar, "displayName" : "Start a new race with yourself", "encodedId": encodedID]]), atIndex: 0)
             
+            
+            self.loadPictures()
+            
+            
             performUIUpdatesOnMain{
+            self.activityIndicator.stopAnimating()
             self.TableView.reloadData()
             }
         }
     }
 
-    
+    func loadPictures() {
+        for image in friendList {
+            
+            guard let user = image["user"] as? [String:AnyObject] else {
+                print("could not get user")
+                return
+            }
+            
+            guard let avatar = user["avatar"] as? String else {
+                print("could not get avatar")
+                return
+            }
+            
+            let avatarURL = NSURL(string: avatar)
+            
+            let avatarImage = NSData(contentsOfURL: (avatarURL)!)
+            
+            self.imageList.append(avatarImage!)
+            
+        }
+    }
     
     
 }
